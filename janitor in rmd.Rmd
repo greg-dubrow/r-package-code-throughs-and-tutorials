@@ -1,0 +1,36 @@
+---
+title: "janitor in rmd"
+author: "greg dubrow"
+date: "6/8/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r janitor}
+mtcars %>%
+  tabyl(gear, cyl) %>%
+  adorn_totals("row") %>% # creates row of sum of cols
+  adorn_totals("col") %>% # creates col of sum of rows
+#  adorn_totals(c("col", "row")) %>% # does both can add in 1 statement or separate
+  adorn_percentages(c("col")) %>% # sums columnwise, bottom row should be 100%
+  adorn_percentages(c("row")) %>% # sum row-wise to 100% 
+         #can only be one or the other, row or col, last one in chain will output
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_ns() %>% # if NA is set, will add them to output
+  adorn_title("top", row_name = "Gears", col_name = "Cylindars") # adds field titles if output
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

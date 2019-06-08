@@ -1,1 +1,1 @@
-Repository for r scripts dedicated to learning and practice for spcific packages
+Repository for r scripts dedicated to learning and practice for specific packages
