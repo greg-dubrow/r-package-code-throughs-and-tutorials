@@ -62,7 +62,6 @@ mtcars %>%
   adorn_ns() %>% # if NA is set, will add them to output
   adorn_title("top", row_name = "Gears", col_name = "Cylindars") # adds field titles if output
 
-
 # to output as df object
 # tdf_crosstab1 <- tdf %>%
 #   tabyl(winners_team, winners_nationality) %>%
