@@ -32,7 +32,7 @@ mtcars %>%
          #can only be one or the other, row or col, last one in chain will output
   adorn_pct_formatting(digits = 1) %>% 
   adorn_ns() %>% # if NA is set, will add them to output
-  adorn_title("top", row_name = "Gears", col_name = "Cylindars") %>% # adds field titles if output
+  adorn_title("top", row_name = "Gears", col_name = "Cylinders") %>% # adds field titles if output
   kable()
 ```
 
