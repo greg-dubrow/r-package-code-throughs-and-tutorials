@@ -1,8 +1,11 @@
 # https://jennybc.github.io/purrr-tutorial/index.html
 
+# maybe also? https://www.zevross.com/blog/2019/06/11/the-power-of-three-purrr-poseful-iteration-in-r-with-map-pmap-and-imap/
+
 library(tidyverse)
 library(repurrrsive)
 library(listviewer)
+library(magrittr)
 ### vecoros and lists - ecessary because purr iterates over vectors & lists
 
 # vectors
@@ -82,9 +85,10 @@ str(got_chars[[1]], list.len = 8) # looks at 1st value, 8 layers
 
 str(got_chars, max.level = 2, list.len = 3) # three elements, 3 layers
 
-# extract elements
+# Introduction to map():extract elements
 
-# using map map(LIST, FUNCTION)
+# using map 
+  # map(LIST, FUNCTION)
 
 # extract names of 1st 4 GoT characters - each call does same thing
 map(got_chars[1:4], "name")
@@ -108,4 +112,57 @@ gotnames <- map_chr(got_chars[1:4], "name") # returns just value to a chr vector
 map_int(got_chars[1:5], "id") # can also use 2 instead of "id"
 
 # extract multiple values
+
+ # call gets 3rd value overall, and the elements requested after c()
+gotvect1 <- got_chars[[3]][c("name", "culture", "gender", "born")] # extracts to another list
+gotvect1
+
+gotvect2 <- map(got_chars, `[`, c("name", "culture", "gender", "born")) # extracts requested elements to list of all characters
+str(gotvect2[3]) # selects one of the list
+str(gotvect2[14:17]) # selects multiple of the list
+
+gotvect2a  <- map(got_chars, magrittr::extract, c("name", "culture", "gender", "born")) # does same but uses magrittr for extract
+
+# exercise - do above but use number instead of name
+gotvect2b  <- map(got_chars, magrittr::extract, c(3, 5, 4, 6)) 
+
+# output to dataframe
+gotdf1 <- map_dfr(got_chars, magrittr::extract, c("name", "culture", "gender", "id", "born", "alive"))
+glimpse(gotdf1)
+
+# in above case types converted automatically. manual version below
+got_chars %>% {tibble(
+     name = map_chr(., "name"),
+  culture = map_chr(., "culture"),
+   gender = map_chr(., "gender"),
+       id = map_chr(., "id"),
+     born = map_chr(., "born"),
+    alive = map_chr(., "alive"),
+)}
+
+# exercise do above but with numbers, not names
+
+got_chars %>% {tibble(
+  name = map_chr(., 3),
+  culture = map_chr(., 5),
+  gender = map_chr(., 4),
+  id = map_chr(., 2),
+  born = map_chr(., 6),
+  alive = map_chr(., 8),
+)}
+
+# Lesson Simplifying data from a list of GitHub users end to end: 
+   # inspection, extraction and simplification, more advanced
+
+str(gh_users[[1]])
+listviewer::jsonedit(gh_users)
+
+map(gh_users, "login")
+names(gh_users[[4]])
+
+str(gh_users) # show all
+str(gh_users, max.level = 2, list.len = 4) # goes two layers into list, gets 1st four elements, all records
+str(gh_users, max.level = 2, list.len = 4) # goes two layers into list, gets 1st four elements, all records
+str(gh_users[[2]], max.level = 2, list.len = 4) # goes two layers into list, gets 1st four elements, 2nd records
+str(gh_users[2:4], max.level = 2, list.len = 4) # goes two layers into list, gets 1st four elements, 2nd - 4th records
 
