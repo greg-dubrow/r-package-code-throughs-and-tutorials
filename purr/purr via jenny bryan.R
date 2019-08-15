@@ -73,8 +73,8 @@ map(l_doub, exp) # function is do action on right of comma to object on left of 
                  # or in purrr language, map exp() over list l_doub
 
 
-## purrr lessons
-# explore example lists
+#### purrr lessons
+## explore example lists
 
 str(wesanderson)
 View(wesanderson)
@@ -160,9 +160,157 @@ listviewer::jsonedit(gh_users)
 map(gh_users, "login")
 names(gh_users[[4]])
 
+map(gh_users, 29)
+
 str(gh_users) # show all
 str(gh_users, max.level = 2, list.len = 4) # goes two layers into list, gets 1st four elements, all records
 str(gh_users, max.level = 2, list.len = 4) # goes two layers into list, gets 1st four elements, all records
 str(gh_users[[2]], max.level = 2, list.len = 4) # goes two layers into list, gets 1st four elements, 2nd records
 str(gh_users[2:4], max.level = 2, list.len = 4) # goes two layers into list, gets 1st four elements, 2nd - 4th records
+
+
+
+#### from zev ross, much lifted from jenny bryan
+# https://www.zevross.com/blog/2019/06/11/the-power-of-three-purrr-poseful-iteration-in-r-with-map-pmap-and-imap/
+library(tidygraph)
+library(ggraph)
+
+dat <- got_chars
+glimpse(dat)
+
+## extract a single element
+map(dat, "name") # name is 3rd element
+map(dat, 3)
+
+ # or use pluck (from purrr)
+map(dat, pluck("name"))
+
+## create a datframe from a list
+map_dfr(dat, `[`, c("name", "gender", "culture"))
+
+map_dfr(dat, `[`, c("name", "gender", "culture", "aliases", "allegiances")) 
+    # throws error b/c many aliases are lists themselves & have more than 1 inputs
+glimpse(map(dat, "aliases"))
+
+# need to do longer method to create df. fields that are themselves lists will be kept that way
+
+dat_m <- dat %>% {
+  tibble(
+    name = map_chr(., "name"),
+    gender = map_chr(., "gender"),
+    culture = map_chr(., "culture"),
+    aliases = map(., "aliases"),
+    allegiances = map(., "allegiances"))
+  }
+view(dat_m)
+
+## write a function
+ # calls on alive field (a logical) and pastes one of two options if TRUE or FALSE
+dead_or_alive <- function(x){
+  ifelse(x[["alive"]], paste(x[["name"]], "is alive!"),
+         paste(x[["name"]], "is dead :("))
+}
+# function says in x (the object, in this case data set), find "alive" vector. if true print 1st statement
+# if false print 2nd statement
+
+map_chr(dat, dead_or_alive)
+ # here dat is the x from the function 
+
+  # compact() removes empty vectors from the list
+dat2 <- map(dat, compact)
+glimpse(dat2)
+glimpse(dat)
+
+dat[[19]]$aliases
+dat2[[19]]$aliases
+
+# function to pull aliases and array them into table for network graph
+aka <- function(x){
+  if("aliases" %in% names(x)){
+    g <- tibble(
+      from = x$name,
+      to = x$aliases)
+    
+    g <- as_tbl_graph(g)
+  }
+}
+
+dat_nw <- map(dat2, aka)
+dat_nw[[2]]
+glimpse(dat_nw)
+
+ggraph(dat_nw[[22]], layout = "graphopt") +
+  geom_edge_link() +
+  geom_node_label(aes(label = name),
+                  label.padding = unit(1, "lines"),
+                  label.size = 0) +
+  theme_graph()
+
+## attempt to write function for graph and apply to list...need to figure out how to do this
+alias_ng <- function(x){
+  ggraph(.data[[x]], layout = "graphopt") +
+    geom_edge_link() +
+    geom_node_label(aes(label = name),
+                    label.padding = unit(1, "lines"),
+                    label.size = 0) +
+    theme_graph()
+}
+imap(dat_nw, alias_ng, .x)
+####
+
+## using pmap row-wise using col names
+
+map(dat_m, paste)
+pmap(dat_m, paste)
+
+dat_pmap <- mutate(dat_m, starklan = map(allegiances, ~str_extract(.x, "Lannister|Stark")))
+glimpse(dat_pmap)
+
+dat_pmap <- mutate(dat_pmap, starklan = map(starklan, ~discard(.x, is.na)))
+glimpse(dat_pmap)
+dat_pmap$starklan[16:18]
+
+dat_pmap <- filter(dat_pmap, starklan %in% c("Lannister", "Stark")) %>%
+  unnest(starklan)
+glimpse(dat_pmap)
+
+
+# uses glue function to create strings using dataset names
+ # note var names after function call are same to those in {} brackets
+whotrust <- function(name, allegiances, starklan, ...) {
+  y <- glue::glue("{name} has an allegiance to the {starklan} family")
+  ifelse(length(allegiances) > 1,
+  glue::glue("{y} but also has {length(allegiances)-1} other allegiances(s)."),
+  glue::glue("{y} and not other allegiances."))
+}
+
+dat_pmap %>% pmap_chr(whotrust)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
