@@ -52,9 +52,13 @@ lapply(mtcars, function(x) length(unique(x)))  # returns length of vars in mtcar
 lapply(mtcars, function(x) sd(x) / mean(x))
 
 
-# Map (note uppercase)
+# Map (note uppercase) is Map(function, onto, using)
 
-xs <- replicate(5, runif(10), simplify = FALSE)
-ws <- replicate(5, rpois(10, 5) + 1, simplify = FALSE)
+xs <- replicate(5, runif(10), simplify = FALSE)  #observations
+ws <- replicate(5, rpois(10, 5) + 1, simplify = FALSE) #weights 
 
-unlist(lapply(xs, mean))
+
+# creates weighted mean ox xs using ws
+xsm <- Map(weighted.mean, xs, ws) #returns list unless preceded by unlist()
+class(xsm)
+xsm
