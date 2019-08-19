@@ -2,7 +2,7 @@
 title: "janitor in rmd"
 author: "greg dubrow"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
