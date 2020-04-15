@@ -152,4 +152,22 @@ get_eurovision <- function(year) {
   }
 }
 
-get_eurovision(1965)
+eurov65 <- get_eurovision(1965) 
+names(eurov65[1])
+
+euyear <- seq(1980, 1990)
+
+eurov80s <- map2_df(euyear, names(comentarios), ~ mutate(.x, ID = .y)) 
+
+eurov80s <- purrr::map(euyear, get_eurovision)
+names(eurov80s[[1]])
+
+change_names <- function(x) {
+  names(x) <- sub("^Language$", "Language", names(x))
+  x
+}
+eurov80s2 <- purrr::map(eurov80s, ~change_names(.x))
+
+names(eurov80s2[[1]])
+
+eurov80s_df <- as.data.frame(eurov80s)
